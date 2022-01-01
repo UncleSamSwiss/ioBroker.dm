@@ -1,0 +1,88 @@
+{
+	"common": {
+		"name": "dm",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"zh-cn": "首次出版"
+			}
+		},
+		"title": "Device Manager",
+		"titleLang": {
+			"en": "Device Manager",
+			"de": "Gerätemanager",
+			"ru": "Диспетчер устройств",
+			"pt": "Gerenciador de Dispositivos",
+			"nl": "Apparaat beheerder",
+			"fr": "Gestionnaire de périphériques",
+			"it": "Gestore dispositivi",
+			"es": "Administrador de dispositivos",
+			"pl": "Menadżer urządzeń",
+			"zh-cn": "装置经理"
+		},
+		"desc": {
+			"en": "Manages devices from different adapters",
+			"de": "Verwaltet Geräte von verschiedenen Adaptern",
+			"ru": "Управляет устройствами от разных адаптеров",
+			"pt": "Gerencia dispositivos de diferentes adaptadores",
+			"nl": "Beheert apparaten vanaf verschillende adapters",
+			"fr": "Gère les appareils à partir de différents adaptateurs",
+			"it": "Gestisce dispositivi da diversi adattatori",
+			"es": "Gestiona dispositivos de diferentes adaptadores",
+			"pl": "Zarządza urządzeniami z różnych adapterów",
+			"zh-cn": "管理来自不同适配器的设备"
+		},
+		"authors": ["UncleSamSwiss <samuel.weibel@gmail.com>"],
+		"keywords": ["device", "hardware", "manager"],
+		"license": "MIT",
+		"platform": "Javascript/Node.js",
+		"main": "build/main.js",
+		"icon": "dm.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/UncleSamSwiss/ioBroker.dm/main/admin/dm.png",
+		"readme": "https://github.com/UncleSamSwiss/ioBroker.dm/blob/main/README.md",
+		"loglevel": "info",
+		"mode": "daemon",
+		"type": "general",
+		"compact": true,
+		"connectionType": "local",
+		"dataSource": "push",
+		"materialize": true,
+		"materializeTab": true,
+		"messagebox": true,
+		"adminTab": {
+			"singleton": true,
+			"name": {
+				"en": "Device Manager",
+				"de": "Gerätemanager",
+				"ru": "Диспетчер устройств",
+				"pt": "Gerenciador de Dispositivos",
+				"nl": "Apparaat beheerder",
+				"fr": "Gestionnaire de périphériques",
+				"it": "Gestore dispositivi",
+				"es": "Administrador de dispositivos",
+				"pl": "Menadżer urządzeń",
+				"zh-cn": "装置经理"
+			},
+			"link": "",
+			"fa-icon": "info"
+		},
+		"dependencies": [
+			{
+				"js-controller": ">=2.0.0"
+			}
+		]
+	},
+	"native": {},
+	"objects": [],
+	"instanceObjects": []
+}

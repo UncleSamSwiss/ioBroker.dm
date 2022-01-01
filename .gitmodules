@@ -1,0 +1,3 @@
+[submodule "admin/src/libs/admin"]
+	path = admin/src/libs/admin
+	url = git@github.com:ioBroker/ioBroker.admin.git
