@@ -18,7 +18,7 @@ Manages devices from different adapters
 
 ## Adapter Developers
 
-Please have a look at the dm-utils to see how you can add support to your adapter so it is shown in the tab of this adapter.
+Please have a look at the [dm-utils](https://github.com/UncleSamSwiss/dm-utils) to see how you can add support to your adapter, so it is shown in the tab of this adapter.
 
 ## Changelog
 
