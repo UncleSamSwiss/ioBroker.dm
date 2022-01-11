@@ -26,7 +26,7 @@ export function DeviceRow(props: {
 
 	const loadDetails = async () => {
 		console.log(`Loading device details for ${device.id}...`);
-		const result = await context.socket.sendTo(instance, "dm:deviceDetails");
+		const result = await context.socket.sendTo(instance, "dm:deviceDetails", device.id);
 		setDetails(result as any as DeviceDetails);
 	};
 	const refresh = () => {
