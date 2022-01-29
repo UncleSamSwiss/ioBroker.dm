@@ -3,13 +3,17 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
+import Backdrop from "@mui/material/Backdrop";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
+import CircularProgress from "@mui/material/CircularProgress";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import LinearProgress from "@mui/material/LinearProgress";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -17,8 +21,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import LinearProgress from "@mui/material/LinearProgress";
 import React from "react";
 import { DeviceAction, DeviceInfo, InstanceAction, InstanceDetails, JsonFormData, JsonFormSchema } from "../types";
 import { DeviceRow } from "./DeviceRow";
@@ -41,6 +43,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 	const [loaded, setLoaded] = React.useState<boolean>(false);
 	const [instanceDetails, setInstanceDetails] = React.useState<InstanceDetails>();
 	const [devices, setDevices] = React.useState<DeviceInfo[]>([]);
+	const [showSpinner, setShowSpinner] = React.useState<boolean>(false);
 	const [openDialog, setOpenDialog] = React.useState<"message" | "confirm" | "form" | "progress">();
 	const [message, setMessage] = React.useState<{ message: string; handleClose: () => void }>();
 	const [confirm, setConfirm] = React.useState<{ message: string; handleClose: (ok: boolean) => void }>();
@@ -79,6 +82,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 
 	const sendActionToInstance = (command: string, message: Record<string, any>, refresh?: () => void): void => {
 		const send = async (): Promise<void> => {
+			setShowSpinner(true);
 			const result = await socket.sendTo(instanceId, command, message);
 			const response = result as Record<string, any>;
 			const type: string = response.type;
@@ -124,7 +128,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 						setProgress(response.progress);
 					}
 					setOpenDialog(response.progress?.open ? "progress" : undefined);
-					setTimeout(() => sendActionToInstance("dm:actionProgress", { origin: response.origin }), 1);
+					sendActionToInstance("dm:actionProgress", { origin: response.origin });
 					break;
 				case "result":
 					if (response.result.refresh === true || response.result.refresh === "instance") {
@@ -137,6 +141,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 					} else {
 						console.log("Not refreshing anything");
 					}
+					setShowSpinner(false);
 					break;
 			}
 		};
@@ -214,9 +219,11 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 					</TableContainer>
 				</AccordionDetails>
 			</Accordion>
+			<Backdrop open={showSpinner}>{!openDialog && <CircularProgress></CircularProgress>}</Backdrop>
 			<Dialog
 				open={openDialog === "message"}
 				onClose={() => message?.handleClose()}
+				hideBackdrop={true}
 				aria-describedby="message-dialog-description"
 			>
 				<DialogContent>
@@ -231,6 +238,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 			<Dialog
 				open={openDialog === "confirm"}
 				onClose={() => confirm?.handleClose(false)}
+				hideBackdrop={true}
 				aria-describedby="confirm-dialog-description"
 			>
 				<DialogContent>
@@ -243,7 +251,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 					</Button>
 				</DialogActions>
 			</Dialog>
-			<Dialog open={openDialog === "form"} onClose={() => form?.handleClose()}>
+			<Dialog open={openDialog === "form"} onClose={() => form?.handleClose()} hideBackdrop={true}>
 				<DialogTitle>{form?.title}</DialogTitle>
 				<DialogContent>
 					{form && (
@@ -263,7 +271,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 					</Button>
 				</DialogActions>
 			</Dialog>
-			<Dialog open={openDialog === "progress"}>
+			<Dialog open={openDialog === "progress"} hideBackdrop={true}>
 				<DialogTitle>{progress?.title}</DialogTitle>
 				<DialogContent>
 					<Box sx={{ display: "flex", alignItems: "center", minWidth: 300 }}>
