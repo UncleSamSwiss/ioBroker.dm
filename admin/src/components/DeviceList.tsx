@@ -1,9 +1,15 @@
-import React from "react";
 import Connection from "@iobroker/adapter-react/Connection";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -11,14 +17,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
-import { DeviceAction, DeviceInfo, InstanceAction, JsonFormData, JsonFormSchema } from "../types";
-import { InstanceInfo } from "./InstanceList";
+import Box from "@mui/material/Box";
+import LinearProgress from "@mui/material/LinearProgress";
+import React from "react";
+import { DeviceAction, DeviceInfo, InstanceAction, InstanceDetails, JsonFormData, JsonFormSchema } from "../types";
 import { DeviceRow } from "./DeviceRow";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
+import { InstanceActionButton } from "./InstanceActionButton";
+import { InstanceInfo } from "./InstanceList";
 import { JsonConfig } from "./JsonConfig";
 
 function _(text: string) {
@@ -34,18 +39,32 @@ export interface ActionContext {
 export default function DeviceList(params: { instanceId: string; instance: InstanceInfo; socket: Connection }) {
 	const { instanceId, instance, socket } = params;
 	const [loaded, setLoaded] = React.useState<boolean>(false);
+	const [instanceDetails, setInstanceDetails] = React.useState<InstanceDetails>();
 	const [devices, setDevices] = React.useState<DeviceInfo[]>([]);
-	const [openDialog, setOpenDialog] = React.useState<"message" | "confirm" | "form">();
+	const [openDialog, setOpenDialog] = React.useState<"message" | "confirm" | "form" | "progress">();
 	const [message, setMessage] = React.useState<{ message: string; handleClose: () => void }>();
 	const [confirm, setConfirm] = React.useState<{ message: string; handleClose: (ok: boolean) => void }>();
-	const [form, setForm] =
-		React.useState<{ schema: JsonFormSchema; data: JsonFormData; handleClose: (data?: JsonFormData) => void }>();
+	const [form, setForm] = React.useState<{
+		title?: string;
+		schema: JsonFormSchema;
+		data: JsonFormData;
+		handleClose: (data?: JsonFormData) => void;
+	}>();
+	const [progress, setProgress] = React.useState<{
+		title: string;
+		indeterminate: boolean;
+		value: number;
+		label: string;
+	}>();
 
-	const loadDevices = async () => {
+	const loadData = async () => {
+		console.log(`Loading instance infos for ${instanceId}...`);
+		const info = await socket.sendTo(instanceId, "dm:instanceInfo");
+		setInstanceDetails(info as any as InstanceDetails);
 		console.log(`Loading devices for ${instanceId}...`);
-		const result = await socket.sendTo(instanceId, "dm:listDevices");
-		setDevices(result as any as DeviceInfo[]);
-		console.log("listDevices", { result });
+		const devices = await socket.sendTo(instanceId, "dm:listDevices");
+		setDevices(devices as any as DeviceInfo[]);
+		console.log("listDevices", { result: devices });
 	};
 
 	const getTranslation = (text: ioBroker.StringOrTranslated | undefined): string => {
@@ -98,10 +117,19 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 					});
 					setOpenDialog("form");
 					break;
+				case "progress":
+					if (openDialog === "progress") {
+						setProgress((old) => ({ ...old, ...response.progress }));
+					} else {
+						setProgress(response.progress);
+					}
+					setOpenDialog(response.progress?.open ? "progress" : undefined);
+					setTimeout(() => sendActionToInstance("dm:actionProgress", { origin: response.origin }), 1);
+					break;
 				case "result":
 					if (response.result.refresh === true || response.result.refresh === "instance") {
 						setDevices([]);
-						await loadDevices();
+						await loadData();
 					} else if (response.result.refresh === "device") {
 						if (refresh) {
 							refresh();
@@ -132,7 +160,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 		}
 
 		setLoaded(true);
-		loadDevices().catch(console.error);
+		loadData().catch(console.error);
 	};
 
 	const handleFormChange = (data: JsonFormData) => {
@@ -150,6 +178,15 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 					<Typography>{instance.title}</Typography>
 				</AccordionSummary>
 				<AccordionDetails>
+					{!!instanceDetails?.actions?.length && (
+						<div>
+							<ButtonGroup size="small" sx={{ height: 36 }}>
+								{instanceDetails.actions.map((a) => (
+									<InstanceActionButton key={a.id} action={a} context={actionContext} />
+								))}
+							</ButtonGroup>
+						</div>
+					)}
 					<TableContainer>
 						<Table>
 							<TableHead>
@@ -207,6 +244,7 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 				</DialogActions>
 			</Dialog>
 			<Dialog open={openDialog === "form"} onClose={() => form?.handleClose()}>
+				<DialogTitle>{form?.title}</DialogTitle>
 				<DialogContent>
 					{form && (
 						<JsonConfig
@@ -224,6 +262,26 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 						OK
 					</Button>
 				</DialogActions>
+			</Dialog>
+			<Dialog open={openDialog === "progress"}>
+				<DialogTitle>{progress?.title}</DialogTitle>
+				<DialogContent>
+					<Box sx={{ display: "flex", alignItems: "center", minWidth: 300 }}>
+						<Box sx={{ width: "100%", mr: 1 }}>
+							<LinearProgress
+								variant={progress?.indeterminate ? "indeterminate" : "determinate"}
+								value={progress?.value || 0}
+							/>
+						</Box>
+						{!!progress?.label && (
+							<Box sx={{ minWidth: 35 }}>
+								<Typography variant="body2" color="text.secondary">
+									{progress?.label}
+								</Typography>
+							</Box>
+						)}
+					</Box>
+				</DialogContent>
 			</Dialog>
 		</>
 	);
