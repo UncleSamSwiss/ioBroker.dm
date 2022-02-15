@@ -45,6 +45,8 @@ export function DeviceRow(props: {
 		loadDetails().catch(console.error);
 	}, [open]);
 
+	const status = !device.status ? [] : Array.isArray(device.status) ? device.status : [device.status];
+
 	return (
 		<>
 			<TableRow>
@@ -60,7 +62,9 @@ export function DeviceRow(props: {
 				<TableCell>{device.id}</TableCell>
 				<TableCell>{device.name}</TableCell>
 				<TableCell>
-					<DeviceStatus status={device.status}></DeviceStatus>
+					{status.map((s, i) => (
+						<DeviceStatus key={i} status={s}></DeviceStatus>
+					))}
 				</TableCell>
 				{hasActions && (
 					<TableCell>
