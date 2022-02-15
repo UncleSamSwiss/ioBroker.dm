@@ -64,11 +64,25 @@ export default function DeviceList(params: { instanceId: string; instance: Insta
 	const loadData = async () => {
 		console.log(`Loading instance infos for ${instanceId}...`);
 		const info = await socket.sendTo(instanceId, "dm:instanceInfo");
+		if (!info || typeof info !== "object" || (info as any).apiVersion !== "v1") {
+			throw new Error(
+				`Message returned from sendTo() doesn't look like one from DeviceManagement, did you accidentally handle the message in your adapter? ${JSON.stringify(
+					info,
+				)}`,
+			);
+		}
 		setInstanceDetails(info as any as InstanceDetails);
 		console.log(`Loading devices for ${instanceId}...`);
 		const devices = await socket.sendTo(instanceId, "dm:listDevices");
-		setDevices(devices as any as DeviceInfo[]);
+		if (!devices || !Array.isArray(devices)) {
+			throw new Error(
+				`Message returned from sendTo() doesn't look like one from DeviceManagement, did you accidentally handle the message in your adapter? ${JSON.stringify(
+					devices,
+				)}`,
+			);
+		}
 		console.log("listDevices", { result: devices });
+		setDevices(devices as any as DeviceInfo[]);
 	};
 
 	const getTranslation = (text: ioBroker.StringOrTranslated | undefined): string => {
