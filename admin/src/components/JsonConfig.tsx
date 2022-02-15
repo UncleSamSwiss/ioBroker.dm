@@ -1,7 +1,7 @@
 import Connection from "@iobroker/adapter-react/Connection";
 import React from "react";
 import JsonConfigComponent from "../libs/json-config/JsonConfigComponent";
-import { JsonFormData, JsonFormSchema } from "../types";
+import { JsonFormData, JsonFormSchema } from "dm-utils";
 
 export function JsonConfig(props: {
 	instanceId: string;

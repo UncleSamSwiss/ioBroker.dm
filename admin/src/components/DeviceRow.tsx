@@ -1,11 +1,12 @@
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import IconButton from "@mui/material/IconButton";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { DeviceDetails, JsonFormData } from "dm-utils";
+import { DeviceInfo } from "dm-utils/build/types/api";
 import * as React from "react";
-import { DeviceDetails, DeviceInfo, JsonFormData } from "../types";
 import { DeviceActionButton } from "./DeviceActionButton";
 import { ActionContext } from "./DeviceList";
 import { DeviceStatus } from "./DeviceStatus";

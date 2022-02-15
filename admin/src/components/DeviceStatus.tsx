@@ -1,8 +1,8 @@
-import * as React from "react";
-import { DeviceStatus } from "../types";
 import LinkIcon from "@mui/icons-material/Link";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import Tooltip from "@mui/material/Tooltip";
+import { DeviceStatus } from "dm-utils";
+import * as React from "react";
 import { FaOrImageIcon } from "./FaOrImgIcon";
 
 export function DeviceStatus(props: { status?: DeviceStatus }) {

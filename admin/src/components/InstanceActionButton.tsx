@@ -1,5 +1,5 @@
+import { InstanceAction } from "dm-utils/build/types/api";
 import React from "react";
-import { InstanceAction } from "../types";
 import { ActionContext } from "./DeviceList";
 import { FaOrImageIcon } from "./FaOrImgIcon";
 import { TooltipButton } from "./TooltipButton";
